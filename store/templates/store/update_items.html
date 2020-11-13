@@ -1,0 +1,9 @@
+{% extends 'store/base.html' %} 
+{% block body %} 
+{% load crispy_forms_tags %}
+  <form action="" method="post" class="" novalidate>
+    {% csrf_token %} 
+    {{form|crispy}}
+    <button class="btn btn-outline-danger">Update</button>
+  </form>
+{% endblock body %}

@@ -1,17 +1,16 @@
-{% extends 'store/base.html' %} {% block body %} 
-{% load crispy_forms_tags %}
+{% extends 'store/base.html' %} {% block body %} {% load crispy_forms_tags %}
 <h3 class="text-center">List Items</h3>
 <form action="" method="post" class="" novalidate>
   {% csrf_token %} {{form|crispy}}
   <button class="btn btn-sm btn-outline-success">Search item</button>
 </form>
-<table class="table table-dark mt-3">
+<table class="table table-dark table-hover mt-3">
   <thead>
     <tr>
       <th scope="col">ITEM NO</th>
       <th scope="col">SIZE</th>
       <th scope="col">COLOR</th>
-      <th scope="col">Quantity in Store</th>
+      <th scope="col">QTTY</th>
       <th scope="col">action</th>
     </tr>
   </thead>
@@ -22,7 +21,13 @@
       <td>{{instance.size}}</td>
       <td>{{instance.color}}</td>
       <td>{{instance.quantity}}</td>
-      <td class="btn btn-light">action</td>
+      <td>
+        <a href="{% url 'update' instance.id %}" class="btn btn-light"
+          >update</a
+        >
+        <a href="{% url 'delete' instance.id %}" class="btn btn-light"
+          >del</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
