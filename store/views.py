@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic.edit import DeleteView
 from django.views.generic import DetailView
@@ -9,6 +11,7 @@ from django.http import HttpResponse
 import csv
 
 # Create your views here.
+@login_required
 def list_item(request):
 	queryset = Stock.objects.all().order_by('-last_updated')
 	form = StockSearchForm(request.POST or None)
@@ -34,6 +37,7 @@ def list_item(request):
 				
 	return render(request, "store/list_store.html", context)
 
+@login_required
 def add_items(request):
 	form = StockCreateForm(request.POST or None)
 	if form.is_valid():
@@ -48,6 +52,7 @@ def add_items(request):
 	}
 	return render (request, "store/add_items.html", context)
 
+@login_required
 def update_items(request, id):
 			queryset = get_object_or_404(Stock, pk=id)
 			form = StockUpdateForm(instance=queryset)
@@ -60,13 +65,13 @@ def update_items(request, id):
 						return redirect('list')
 			return render(request, 'store/update_items.html',{'form': form})
 
-class StockDeleteView(DeleteView):
+class StockDeleteView(LoginRequiredMixin,DeleteView):
 		model = Stock
 		success_url = '/list'
 
-class StockDetailView(DetailView):
+class StockDetailView(LoginRequiredMixin,DetailView):
 		model = Stock
-
+@login_required
 def issue_items(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
 	form = IssueForm(request.POST or None, instance=queryset)
@@ -90,7 +95,7 @@ def issue_items(request, pk):
 	return render(request, "store/add_items.html", context)
 
 
-
+@login_required
 def receive_items(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
 	form = ReceiveForm(request.POST or None, instance=queryset)
@@ -110,7 +115,7 @@ def receive_items(request, pk):
 			# "username": 'Receive By: ' + str(request.user),
 		}
 	return render(request, "store/add_items.html", context)
-
+@login_required
 def reorder_level(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
 	form = ReorderLevelForm(request.POST or None, instance=queryset)
