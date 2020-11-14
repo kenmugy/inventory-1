@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.generic.edit import DeleteView
+from django.views.generic import DetailView
 from .models import Stock
-from .forms import StockCreateForm, StockSearchForm, StockUpdateForm
+from .forms import StockCreateForm, StockSearchForm, StockUpdateForm, IssueForm, ReceiveForm
+
+from django.http import HttpResponse
+import csv
 
 # Create your views here.
 def list_item(request):
@@ -18,6 +22,15 @@ def list_item(request):
 		"queryset": queryset,
 		"form": form
 		}
+				if form['export_to_CSV'].value() == True:
+					response = HttpResponse(content_type='text/csv')
+					response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
+					writer = csv.writer(response)
+					writer.writerow(['ITEM NO', 'SIZE', 'COLOR'])
+					instance = queryset
+					for stock in instance:
+						writer.writerow([stock.item_no, stock.size, stock.quantity])
+					return response
 				
 	return render(request, "store/list_store.html", context)
 
@@ -48,8 +61,56 @@ def update_items(request, id):
 			return render(request, 'store/update_items.html',{'form': form})
 
 class StockDeleteView(DeleteView):
-    model = Stock
-    success_url = '/list'
+		model = Stock
+		success_url = '/list'
+
+class StockDetailView(DetailView):
+		model = Stock
+
+def issue_items(request, pk):
+	queryset = get_object_or_404(Stock, id=pk)
+	form = IssueForm(request.POST or None, instance=queryset)
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.quantity -= instance.issue_quantity
+		# instance.issue_by = str(request.user)
+		messages.success(request, "Issued SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no) + "s now left in Store")
+		instance.save()
+
+		# return redirect('detail')
+		return redirect('/'+str(instance.id)+'/detail')
+		# return HttpResponseRedirect(instance.get_absolute_url())
+
+	context = {
+		# "title": 'Issue ' + str(queryset.item_no),
+		"queryset": queryset,
+		"form": form,
+		# "username": 'Issue By: ' + str(request.user),
+	}
+	return render(request, "store/add_items.html", context)
+
+
+
+def receive_items(request, pk):
+	queryset = get_object_or_404(Stock, id=pk)
+	form = ReceiveForm(request.POST or None, instance=queryset)
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.quantity += instance.receive_quantity
+		instance.save()
+		messages.success(request, "Received SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no)+"s now in Store")
+
+		# return redirect('detail')
+		return redirect('/'+str(instance.id)+'/detail')
+		# return HttpResponseRedirect(instance.get_absolute_url())
+	context = {
+			# "title": 'Receive ' + str(queryset.item_no),
+			"instance": queryset,
+			"form": form,
+			# "username": 'Receive By: ' + str(request.user),
+		}
+	return render(request, "store/add_items.html", context)
+
 
 def home(request):
 	return render(request, 'store/home.html')

@@ -1,7 +1,11 @@
 from django.conf import settings
 from django.urls import path
 from django.conf.urls.static import static
-from .views import home, list_item, add_items, update_items, StockDeleteView
+from .views import (
+home, list_item, 
+add_items, update_items, 
+StockDeleteView, StockDetailView, 
+issue_items, receive_items)
 
 
 urlpatterns = [
@@ -9,7 +13,10 @@ urlpatterns = [
     path('list/', list_item, name='list'),
     path('add/', add_items, name='add'),
     path('<int:id>/update/', update_items, name='update'),
-    path("<int:pk>/delete/", StockDeleteView.as_view(), name="delete")
+    path('<int:pk>/detail/', StockDetailView.as_view(), name='detail'),
+    path("<int:pk>/delete/", StockDeleteView.as_view(), name="delete"),
+    path("<int:pk>/issue/", issue_items, name="issue"),
+    path("<int:pk>/recieve/", receive_items, name="recieve")
 ]
 
 if settings.DEBUG:

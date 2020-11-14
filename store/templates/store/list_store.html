@@ -22,11 +22,11 @@
       <td>{{instance.color}}</td>
       <td>{{instance.quantity}}</td>
       <td>
-        <a href="{% url 'update' instance.id %}" class="btn btn-light"
+        <a href="{% url 'detail' instance.id %}" class="btn btn-sm btn-light">view</a>
+        <a href="{% url 'update' instance.id %}" class="btn btn-sm btn-light"
           >update</a
         >
-        <a href="{% url 'delete' instance.id %}" class="btn btn-light"
-          >del</a>
+        <a href="{% url 'delete' instance.id %}" class="btn btn-sm btn-light">del</a>
       </td>
     </tr>
     {% endfor %}
