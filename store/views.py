@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.views.generic.edit import DeleteView
 from django.views.generic import DetailView
 from .models import Stock
-from .forms import StockCreateForm, StockSearchForm, StockUpdateForm, IssueForm, ReceiveForm
+from .forms import *
 
 from django.http import HttpResponse
 import csv
@@ -111,6 +111,20 @@ def receive_items(request, pk):
 		}
 	return render(request, "store/add_items.html", context)
 
+def reorder_level(request, pk):
+	queryset = get_object_or_404(Stock, id=pk)
+	form = ReorderLevelForm(request.POST or None, instance=queryset)
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.save()
+		messages.success(request, "Reorder level for " + str(instance.item_no) + " is updated to " + str(instance.reorder_level))
+
+		return redirect("list")
+	context = {
+			"instance": queryset,
+			"form": form,
+		}
+	return render(request, "store/add_items.html", context)
 
 def home(request):
 	return render(request, 'store/home.html')

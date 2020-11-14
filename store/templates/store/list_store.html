@@ -12,21 +12,40 @@
       <th scope="col">COLOR</th>
       <th scope="col">QTTY</th>
       <th scope="col">action</th>
+      <th scope="col">Reorder-LEVEL</th>
     </tr>
   </thead>
   <tbody>
     {% for instance in queryset %}
+
     <tr>
       <td>{{instance.item_no}}</td>
       <td>{{instance.size}}</td>
       <td>{{instance.color}}</td>
-      <td>{{instance.quantity}}</td>
       <td>
-        <a href="{% url 'detail' instance.id %}" class="btn btn-sm btn-light">view</a>
+        {% if instance.quantity <= instance.reorder_level %}
+        <h5>
+          <span class="badge badge-warning">{{instance.quantity}}</span>
+        </h5>
+        {% elif instance.quantity <= 10 %}
+        <h5>
+          <span class="badge badge-danger">{{instance.quantity}}</span>
+        </h5>
+        {% else %}{{instance.quantity}} {% endif %}
+      </td>
+      <td>
+        <a href="{% url 'detail' instance.id %}" class="btn btn-sm btn-light"
+          >view</a
+        >
         <a href="{% url 'update' instance.id %}" class="btn btn-sm btn-light"
           >update</a
         >
-        <a href="{% url 'delete' instance.id %}" class="btn btn-sm btn-light">del</a>
+        <a href="{% url 'delete' instance.id %}" class="btn btn-sm btn-light"
+          >del</a
+        >
+      </td>
+      <td>
+        <a href="{% url 'reorder' instance.id %}">{{instance.reorder_level}}</a>
       </td>
     </tr>
     {% endfor %}
