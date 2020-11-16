@@ -1,3 +1,13 @@
+body {
+  /* background-image: url('../img/bg.jpg');
+  background-position: cover; */
+  background-color: rgb(226, 217, 204);
+}
+
 nav {
-    background: blue;
+  background: blue;
+}
+
+.card {
+  background-color: antiquewhite;
 }

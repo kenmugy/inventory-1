@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib import messages
@@ -20,20 +20,20 @@ def list_item(request):
 		"form": form
 		}
 	if request.method == 'POST':
-				queryset = Stock.objects.filter(item_no__icontains=form['item_no'].value(),color__icontains=form['color'].value(),)
-				context = {
+		queryset = Stock.objects.filter(item_no__icontains=form['item_no'].value(),color__icontains=form['color'].value(),)
+		context = {
 		"queryset": queryset,
 		"form": form
 		}
-				if form['export_to_CSV'].value() == True:
-					response = HttpResponse(content_type='text/csv')
-					response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
-					writer = csv.writer(response)
-					writer.writerow(['ITEM NO', 'SIZE', 'COLOR'])
-					instance = queryset
-					for stock in instance:
-						writer.writerow([stock.item_no, stock.size, stock.quantity])
-					return response
+		if form['export_to_CSV'].value() == True:
+			response = HttpResponse(content_type='text/csv')
+			response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
+			writer = csv.writer(response)
+			writer.writerow(['ITEM NO', 'SIZE', 'COLOR'])
+			instance = queryset
+			for stock in instance:
+				writer.writerow([stock.item_no, stock.size, stock.quantity])
+			return response
 				
 	return render(request, "store/list_store.html", context)
 
@@ -78,9 +78,21 @@ def issue_items(request, pk):
 	if form.is_valid():
 		instance = form.save(commit=False)
 		instance.quantity -= instance.issue_quantity
-		# instance.issue_by = str(request.user)
+		instance.issue_by = str(request.user)
 		messages.success(request, "Issued SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no) + "s now left in Store")
 		instance.save()
+		issue_history = StockHistory(
+			id = instance.id, 
+			last_updated = instance.last_updated,
+			size = instance.size,
+			color = instance.color,
+			item_no = instance.item_no, 
+			quantity = instance.quantity, 
+			issue_to = instance.issue_to, 
+			issue_by = instance.issue_by, 
+			issue_quantity = instance.issue_quantity, 
+			)
+		issue_history.save()
 
 		# return redirect('detail')
 		return redirect('/'+str(instance.id)+'/detail')
@@ -90,29 +102,41 @@ def issue_items(request, pk):
 		# "title": 'Issue ' + str(queryset.item_no),
 		"queryset": queryset,
 		"form": form,
-		# "username": 'Issue By: ' + str(request.user),
+		"username": str(request.user),
 	}
 	return render(request, "store/add_items.html", context)
 
 
 @login_required
-def receive_items(request, pk):
+def recieve_items(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
-	form = ReceiveForm(request.POST or None, instance=queryset)
+	form = RecieveForm(request.POST or None, instance=queryset)
 	if form.is_valid():
 		instance = form.save(commit=False)
-		instance.quantity += instance.receive_quantity
+		instance.quantity += instance.recieve_quantity
+		instance.recieve_by = str(request.user)
+		messages.success(request, "recieved SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no)+"s now in Store")
 		instance.save()
-		messages.success(request, "Received SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no)+"s now in Store")
+		recieve_history = StockHistory(
+			id = instance.id, 
+			last_updated = instance.last_updated,
+			size = instance.size,
+			color = instance.color,
+			item_no = instance.item_no, 
+			quantity = instance.quantity, 
+			recieve_by = instance.recieve_by, 
+			recieve_quantity = instance.recieve_quantity, 
+			)
+		recieve_history.save()
 
 		# return redirect('detail')
 		return redirect('/'+str(instance.id)+'/detail')
 		# return HttpResponseRedirect(instance.get_absolute_url())
 	context = {
-			# "title": 'Receive ' + str(queryset.item_no),
+			# "title": 'recieve ' + str(queryset.item_no),
 			"instance": queryset,
 			"form": form,
-			# "username": 'Receive By: ' + str(request.user),
+			"username": str(request.user),
 		}
 	return render(request, "store/add_items.html", context)
 @login_required
@@ -130,6 +154,33 @@ def reorder_level(request, pk):
 			"form": form,
 		}
 	return render(request, "store/add_items.html", context)
+
+@login_required
+def list_history(request):
+	header = 'LIST OF ITEMS'
+	form = StockSearchForm(request.POST or None)
+	queryset = StockHistory.objects.all().order_by('-last_updated')
+	context = {
+		"header": header,
+		"form":form,
+		"queryset": queryset,
+	}
+	if request.method == 'POST':
+		queryset = StockHistory.objects.filter(item_no__icontains=form['item_no'].value(),color__icontains=form['color'].value(),)
+		context = {
+		"queryset": queryset,
+		"form": form
+		}
+		if form['export_to_CSV'].value() == True:
+			response = HttpResponse(content_type='text/csv')
+			response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
+			writer = csv.writer(response)
+			writer.writerow(['ITEM NO', 'SIZE', 'COLOR'])
+			instance = queryset
+			for stock in instance:
+				writer.writerow([stock.item_no, stock.size, stock.quantity])
+			return response
+	return render(request, "store/list_history.html",context)
 
 def home(request):
 	return render(request, 'store/home.html')

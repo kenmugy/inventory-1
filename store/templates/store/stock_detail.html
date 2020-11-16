@@ -1,27 +1,30 @@
 {% extends 'store/base.html' %} {% block body %} {% load crispy_forms_tags %}
-<div class="card" style="width: 22rem; margin: 0 auto">
-  <div class="card-header">ITEM NO: <b>{{object.item_no}}</b></div>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">SIZE: <b>{{object.item_no}}</b></li>
-    <li class="list-group-item">COLOR: <b>{{object.color}}</b></li>
-    <li class="list-group-item">QUANTITY: <b>{{object.quantity}}</b></li>
-    <li class="list-group-item">
-      RECIEVED BY: <b>{{object.receive_quantity}}</b>
-    </li>
-    <li class="list-group-item">
-      LAST UPDATED: <b>{{object.last_updated}}</b>
-    </li>
-    <li
-      class="list-group-item"
-      style="display: flex; justify-content: space-between"
-    >
-      <a href="{% url 'recieve' object.pk %}" class="btn btn-success"
-        >Recieve Item</a
-      >
-      <a href="{% url 'issue' object.pk %}" class="btn btn-danger"
-        >Issue Item</a
-      >
-    </li>
-  </ul>
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">ITEM NO: <b class="mr-0">{{object.item_no}}</b></div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">SIZE: <b class="mr-0">{{object.size}} M</b></li>
+        <li class="list-group-item">COLOR: <b class="mr-0">{{object.color}}</b></li>
+        <li class="list-group-item">QUANTITY: <b class="mr-0">{{object.quantity}}</b></li>
+        <li class="list-group-item">RECIEVED BY: <b class="mr-0">{{user}}</b></li>
+        <li class="list-group-item">ISSUED TO: <b class="mr-0">{{object.issue_to}}</b></li>
+        <li class="list-group-item">
+          LAST UPDATED: <b>{{object.last_updated}}</b>
+        </li>
+        <li
+          class="list-group-item"
+          style="display: flex; justify-content: space-between"
+        >
+          <a href="{% url 'recieve' object.pk %}" class="btn btn-success"
+            >Recieve Item</a
+          >
+          <a href="{% url 'issue' object.pk %}" class="btn btn-danger"
+            >Issue Item</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>
 {% endblock body %}
