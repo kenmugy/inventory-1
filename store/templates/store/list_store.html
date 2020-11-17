@@ -13,7 +13,7 @@
   </div>
   <div class="col-sm-9">
     <h3 class="text-center">List Items</h3>
-    <table class="table table-dark table-sm table-hover mt-3">
+    <table class="table table-bordered table-dark table-sm table-hover mt-3">
   </div>
 </div>
 
@@ -23,13 +23,13 @@
       <th scope="col">SIZE</th>
       <th scope="col">COLOR</th>
       <th scope="col">QTTY</th>
-      <th scope="col">action</th>
+      <th scope="col">ACTION</th>
       <th scope="col">Reorder-LEVEL</th>
     </tr>
   </thead>
   <tbody>
+    {% if queryset %}
     {% for instance in queryset %}
-    
     <tr>
       <td>{{instance.item_no}}</td>
       <td>{{instance.size}}</td>
@@ -63,5 +63,8 @@
     {% endfor %}
   </tbody>
 </table>
+{% else %}
+  <h1 class="text-center text-danger">...No Results...</h1>
+{% endif %}
 
 {% endblock body %}

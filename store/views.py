@@ -6,6 +6,7 @@ from django.views.generic.edit import DeleteView
 from django.views.generic import DetailView
 from .models import Stock
 from .forms import *
+# from .decorators import *
 
 from django.http import HttpResponse
 import csv
@@ -71,6 +72,7 @@ class StockDeleteView(LoginRequiredMixin,DeleteView):
 
 class StockDetailView(LoginRequiredMixin,DetailView):
 		model = Stock
+
 @login_required
 def issue_items(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
@@ -82,7 +84,6 @@ def issue_items(request, pk):
 		messages.success(request, "Issued SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no) + "s now left in Store")
 		instance.save()
 		issue_history = StockHistory(
-			id = instance.id, 
 			last_updated = instance.last_updated,
 			size = instance.size,
 			color = instance.color,
@@ -94,12 +95,10 @@ def issue_items(request, pk):
 			)
 		issue_history.save()
 
-		# return redirect('detail')
 		return redirect('/'+str(instance.id)+'/detail')
 		# return HttpResponseRedirect(instance.get_absolute_url())
 
 	context = {
-		# "title": 'Issue ' + str(queryset.item_no),
 		"queryset": queryset,
 		"form": form,
 		"username": str(request.user),
@@ -118,27 +117,25 @@ def recieve_items(request, pk):
 		messages.success(request, "recieved SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_no)+"s now in Store")
 		instance.save()
 		recieve_history = StockHistory(
-			id = instance.id, 
 			last_updated = instance.last_updated,
 			size = instance.size,
 			color = instance.color,
 			item_no = instance.item_no, 
-			quantity = instance.quantity, 
+			quantity = instance.quantity , 
 			recieve_by = instance.recieve_by, 
 			recieve_quantity = instance.recieve_quantity, 
 			)
 		recieve_history.save()
 
-		# return redirect('detail')
 		return redirect('/'+str(instance.id)+'/detail')
 		# return HttpResponseRedirect(instance.get_absolute_url())
 	context = {
-			# "title": 'recieve ' + str(queryset.item_no),
 			"instance": queryset,
 			"form": form,
 			"username": str(request.user),
 		}
 	return render(request, "store/add_items.html", context)
+
 @login_required
 def reorder_level(request, pk):
 	queryset = get_object_or_404(Stock, id=pk)
@@ -157,28 +154,39 @@ def reorder_level(request, pk):
 
 @login_required
 def list_history(request):
-	header = 'LIST OF ITEMS'
-	form = StockSearchForm(request.POST or None)
+	form = StockHistorySearchForm(request.POST or None)
 	queryset = StockHistory.objects.all().order_by('-last_updated')
+	for instance in queryset:
+		if not instance.recieve_by:
+			instance.recieve_by = ""
+		elif not instance.issue_by or instance.issue_to:
+			instance.issue_by = ""
+			instance.issue_to = ""
+	print(request)
 	context = {
-		"header": header,
 		"form":form,
 		"queryset": queryset,
 	}
 	if request.method == 'POST':
-		queryset = StockHistory.objects.filter(item_no__icontains=form['item_no'].value(),color__icontains=form['color'].value(),)
+		queryset = StockHistory.objects.filter(item_no__icontains=form['item_no'].value(),
+		color__icontains=form['color'].value(),
+		# last_updated__range=[
+		# 					form['start_date'].value() or None,
+		# 					form['end_date'].value() or None
+		# 				]
+						)
 		context = {
 		"queryset": queryset,
 		"form": form
 		}
 		if form['export_to_CSV'].value() == True:
 			response = HttpResponse(content_type='text/csv')
-			response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
+			response['Content-Disposition'] = 'attachment; filename="previous transactions.csv"'
 			writer = csv.writer(response)
-			writer.writerow(['ITEM NO', 'SIZE', 'COLOR'])
+			writer.writerow(['ITEM NO', 'SIZE', 'COLOR', 'ISSUED QTY', 'ISSUED BY', 'ISSUED TO', 'RECIEVED QTY', 'RECIEVED BY', 'lAST UPDATE DATE'])
 			instance = queryset
 			for stock in instance:
-				writer.writerow([stock.item_no, stock.size, stock.quantity])
+				writer.writerow([stock.item_no, stock.size, stock.color, stock.issue_quantity, stock.issue_by,stock.issue_to, stock.recieve_quantity, stock.recieve_by, stock.last_updated])
 			return response
 	return render(request, "store/list_history.html",context)
 

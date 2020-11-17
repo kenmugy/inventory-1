@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="{% static 'store/css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'store/css/jquery-ui.min.css' %}" />
+    <!-- <link rel="stylesheet" href="{% static 'store/css/jquery-ui.min.css' %}" />
     <link rel="stylesheet" href="{% static 'store/css/jquery-ui.structure.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'store/css/jquery-ui.theme.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'store/css/jquery-ui.theme.min.css' %}" /> -->
     <link
       rel="stylesheet"
       href="{% static 'store/css/bootstrap.min.css' %}"
@@ -70,10 +70,10 @@
         {% endif %}
         {% block body %} {% endblock body %}
       </div>
-      <script src="{% static 'store/js/jquery-3.3.1.min.js' %}"></script>
-      <script src="{% static 'store/js/jquery-ui.min.js' %}"></script>
-      <script src="{% static 'store/js/bootstrap.min.js' %}"></script>
       <script src="{% static 'store/js/main.js' %}"></script>
+      <script src="{% static 'store/js/jquery-3.3.1.min.js' %}"></script>
+      <!-- <script src="{% static 'store/js/jquery-ui.min.js' %}"></script> -->
+      <script src="{% static 'store/js/bootstrap.min.js' %}"></script>
     </div>
   </body>
 </html>
