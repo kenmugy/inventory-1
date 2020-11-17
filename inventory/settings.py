@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'lv=ei#!1_98ukkp2@=z3c%81cxi@17azl-t4fd_04z01*7pu)2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['inventorystoredb.herokuapp.com','localhost']
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'store',
     'users',
     'crispy_forms',
+    
 ]
 
 MIDDLEWARE = [
